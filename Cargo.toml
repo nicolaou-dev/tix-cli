@@ -1,0 +1,21 @@
+[package]
+name = "tix"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap = { version = "4.5.45", features = ["derive"] }
+strum = { version = "0.27.2", features = ["derive"] }
+thiserror = "2.0.16"
+
+[build-dependencies]
+bindgen = "0.72.0"
+flate2 = "1.1.2"
+tar = "0.4.44"
+ureq = "3.1.0"
+zip = "4.5.0"
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
