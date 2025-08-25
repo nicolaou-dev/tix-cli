@@ -2,6 +2,7 @@
 name = "tix"
 version = "0.1.0"
 edition = "2024"
+repository = "https://github.com/nicolaou-dev/tix-cli"
 
 [dependencies]
 clap = { version = "4.5.45", features = ["derive"] }

@@ -7,5 +7,8 @@
 // Include auto-generated bindings
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
+pub mod error;
+pub use error::TixError;
+
 pub mod init;
 pub use init::init;
