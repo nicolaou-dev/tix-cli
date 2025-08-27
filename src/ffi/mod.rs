@@ -14,4 +14,4 @@ pub mod init;
 pub use init::init;
 
 pub mod config;
-pub use config::config_set;
+pub use config::{config_get, config_set};

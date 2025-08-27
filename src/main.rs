@@ -51,6 +51,9 @@ fn handle_init() -> anyhow::Result<()> {
 fn handle_config(args: ConfigArgs) -> anyhow::Result<()> {
     if let Some(value) = args.value {
         ffi::config_set(&args.key, &value)?;
+    } else {
+        let value = ffi::config_get(&args.key)?;
+        println!("{value}");
     }
     Ok(())
 }

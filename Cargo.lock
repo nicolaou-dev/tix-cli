@@ -948,6 +948,7 @@ dependencies = [
  "bindgen",
  "clap",
  "flate2",
+ "libc",
  "strum",
  "tar",
  "thiserror",
