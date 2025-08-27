@@ -10,6 +10,8 @@ pub enum TixError {
     CommandFailed,
     #[error("File system error")]
     FileSystemError,
+    #[error("Invalid ticket ID")]
+    InvalidTicketId,
     #[error("Unknown error")]
     UnknownError,
     #[error("Failed to create tix workspace")]

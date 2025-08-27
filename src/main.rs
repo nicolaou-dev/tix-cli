@@ -1,6 +1,6 @@
 use clap::{Args, Parser, Subcommand};
 
-use crate::ffi::add::Priority;
+use crate::ffi::{Status, add::Priority};
 
 mod editor;
 mod ffi;
@@ -26,6 +26,9 @@ enum Commands {
 
     /// Add a new ticket
     Add(AddArgs),
+
+    /// Update ticket status
+    Mv(MvArgs),
 }
 
 #[derive(Args)]
@@ -62,6 +65,15 @@ struct AddArgs {
     priority: Priority,
 }
 
+#[derive(Args)]
+struct MvArgs {
+    /// Ticket ID
+    ticket_id: String,
+
+    /// New status
+    status: Status,
+}
+
 fn main() {
     let cli = Cli::parse();
 
@@ -70,6 +82,7 @@ fn main() {
         Commands::Config(args) => handle_config(args),
         Commands::Switch(args) => handle_switch(args),
         Commands::Add(args) => handle_add(args),
+        Commands::Mv(args) => handle_mv(args),
     };
 
     if let Err(err) = result {
@@ -111,5 +124,14 @@ fn handle_add(args: AddArgs) -> anyhow::Result<()> {
 
     let result = ffi::add(&title, body.as_deref(), priority)?;
     println!("{result}");
+    Ok(())
+}
+
+fn handle_mv(args: MvArgs) -> anyhow::Result<()> {
+    ffi::mv(&args.ticket_id, args.status)?;
+    println!(
+        "Ticket {} status updated to {:?}",
+        args.ticket_id, args.status
+    );
     Ok(())
 }
