@@ -18,3 +18,6 @@ pub use config::{config_get, config_set};
 
 pub mod project;
 pub use project::switch;
+
+pub mod add;
+pub use add::add;

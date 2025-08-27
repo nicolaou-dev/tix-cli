@@ -1,5 +1,7 @@
 use clap::{Args, Parser, Subcommand};
 
+use crate::ffi::add::Priority;
+
 mod ffi;
 
 #[derive(Parser)]
@@ -20,6 +22,9 @@ enum Commands {
 
     /// Switch to a different ticket
     Switch(SwitchArgs),
+
+    /// Add a new ticket
+    Add(AddArgs),
 }
 
 #[derive(Args)]
@@ -41,6 +46,21 @@ struct SwitchArgs {
     create: bool,
 }
 
+#[derive(Args)]
+struct AddArgs {
+    /// Ticket title
+    #[arg(short, long)]
+    title: String,
+
+    /// Ticket body
+    #[arg(short, long)]
+    body: Option<String>,
+
+    /// Ticket priority
+    #[arg(short, long, default_value = "none")]
+    priority: Priority,
+}
+
 fn main() {
     let cli = Cli::parse();
 
@@ -48,6 +68,7 @@ fn main() {
         Commands::Init => handle_init(),
         Commands::Config(args) => handle_config(args),
         Commands::Switch(args) => handle_switch(args),
+        Commands::Add(args) => handle_add(args),
     };
 
     if let Err(err) = result {
@@ -74,6 +95,12 @@ fn handle_config(args: ConfigArgs) -> anyhow::Result<()> {
 
 fn handle_switch(args: SwitchArgs) -> anyhow::Result<()> {
     let result = ffi::switch(&args.project, args.create)?;
+    println!("{result}");
+    Ok(())
+}
+
+fn handle_add(args: AddArgs) -> anyhow::Result<()> {
+    let result = ffi::add(&args.title, args.body.as_deref(), args.priority)?;
     println!("{result}");
     Ok(())
 }
