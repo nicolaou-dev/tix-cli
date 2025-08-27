@@ -17,6 +17,9 @@ enum Commands {
 
     /// Get or set configuration values
     Config(ConfigArgs),
+
+    /// Switch to a different ticket
+    Switch(SwitchArgs),
 }
 
 #[derive(Args)]
@@ -28,12 +31,23 @@ struct ConfigArgs {
     value: Option<String>,
 }
 
+#[derive(Args)]
+struct SwitchArgs {
+    /// Project name
+    project: String,
+
+    /// Create the project if it doesn't exist
+    #[arg(short, long)]
+    create: bool,
+}
+
 fn main() {
     let cli = Cli::parse();
 
     let result = match cli.command {
         Commands::Init => handle_init(),
         Commands::Config(args) => handle_config(args),
+        Commands::Switch(args) => handle_switch(args),
     };
 
     if let Err(err) = result {
@@ -55,5 +69,11 @@ fn handle_config(args: ConfigArgs) -> anyhow::Result<()> {
         let value = ffi::config_get(&args.key)?;
         println!("{value}");
     }
+    Ok(())
+}
+
+fn handle_switch(args: SwitchArgs) -> anyhow::Result<()> {
+    let result = ffi::switch(&args.project, args.create)?;
+    println!("{result}");
     Ok(())
 }

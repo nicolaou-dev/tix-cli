@@ -22,12 +22,12 @@ pub enum TixError {
     RemoteAlreadyExists,
     #[error("Invalid remote name")]
     RemoteInvalidName,
-    #[error("Project not found")]
-    SwitchProjectNotFound,
-    #[error("Project already exists")]
-    SwitchProjectAlreadyExists,
-    #[error("Already on the specified project")]
-    SwitchAlreadyOnProject,
+    #[error("Project '{0}' not found")]
+    SwitchProjectNotFound(String),
+    #[error("Project '{0}' already exists")]
+    SwitchProjectAlreadyExists(String),
+    #[error("Already on project '{0}'")]
+    SwitchAlreadyOnProject(String),
     #[error("Invalid priority value")]
     InvalidPriority,
     #[error("Invalid title")]

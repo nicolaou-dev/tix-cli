@@ -15,3 +15,6 @@ pub use init::init;
 
 pub mod config;
 pub use config::{config_get, config_set};
+
+pub mod project;
+pub use project::switch;
