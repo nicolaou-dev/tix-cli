@@ -12,3 +12,6 @@ pub use error::TixError;
 
 pub mod init;
 pub use init::init;
+
+pub mod config;
+pub use config::config_set;
