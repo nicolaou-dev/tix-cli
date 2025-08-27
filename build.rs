@@ -20,7 +20,7 @@ fn main() {
         _ => panic!("Unsupported platform: {target_os}-{target_arch}"),
     };
 
-    let version = "v0.0.1";
+    let version = "v0.0.2";
     let download_url =
         format!("https://github.com/nicolaou-dev/tix/releases/download/{version}/{download_name}");
 
@@ -50,7 +50,7 @@ fn main() {
         let bindings = bindgen::Builder::default()
             .header(header_path.to_str().unwrap())
             .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
-            .generate_comments(true)  // Preserve documentation comments
+            .generate_comments(true) // Preserve documentation comments
             .generate()
             .expect("Unable to generate bindings");
 
@@ -68,7 +68,7 @@ fn download_file(url: &str, path: &PathBuf) {
         .unwrap_or_else(|_| panic!("Failed to download from {url}"));
 
     let mut file = fs::File::create(path).expect("Failed to create file");
-    
+
     let mut reader = response.body_mut().as_reader();
     std::io::copy(&mut reader, &mut file).expect("Failed to write file");
 }
