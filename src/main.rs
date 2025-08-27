@@ -2,6 +2,7 @@ use clap::{Args, Parser, Subcommand};
 
 use crate::ffi::add::Priority;
 
+mod editor;
 mod ffi;
 
 #[derive(Parser)]
@@ -50,7 +51,7 @@ struct SwitchArgs {
 struct AddArgs {
     /// Ticket title
     #[arg(short, long)]
-    title: String,
+    title: Option<String>,
 
     /// Ticket body
     #[arg(short, long)]
@@ -100,7 +101,15 @@ fn handle_switch(args: SwitchArgs) -> anyhow::Result<()> {
 }
 
 fn handle_add(args: AddArgs) -> anyhow::Result<()> {
-    let result = ffi::add(&args.title, args.body.as_deref(), args.priority)?;
+    let (title, body, priority) = if let Some(title) = args.title {
+        // Use provided arguments
+        (title, args.body, args.priority)
+    } else {
+        // Open editor for interactive input
+        editor::open_editor_for_ticket()?
+    };
+
+    let result = ffi::add(&title, body.as_deref(), priority)?;
     println!("{result}");
     Ok(())
 }
