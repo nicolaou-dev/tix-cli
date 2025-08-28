@@ -22,8 +22,14 @@ pub use project::switch;
 pub mod add;
 pub use add::add;
 
+pub mod mv;
+pub use mv::mv;
+
+pub mod list;
+pub use list::list;
+
 pub mod status;
 pub use status::Status;
 
-pub mod mv;
-pub use mv::mv;
+pub mod priority;
+pub use priority::Priority;

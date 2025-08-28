@@ -1,6 +1,6 @@
 use clap::{Args, Parser, Subcommand};
 
-use crate::ffi::{Status, add::Priority};
+use crate::ffi::{Status, priority::Priority};
 
 mod editor;
 mod ffi;
@@ -29,6 +29,10 @@ enum Commands {
 
     /// Update ticket status
     Mv(MvArgs),
+
+    /// List tickets
+    #[command(name = "ls")]
+    List(ListArgs),
 }
 
 #[derive(Args)]
@@ -74,6 +78,21 @@ struct MvArgs {
     status: Status,
 }
 
+#[derive(Args)]
+struct ListArgs {
+    /// Show detailed information
+    #[arg(short, long)]
+    long: bool,
+
+    /// Filter by status (can be specified multiple times)
+    #[arg(short = 's', long = "status", value_enum)]
+    status: Vec<Status>,
+
+    /// Filter by priority (can be specified multiple times) 
+    #[arg(short = 'p', long = "priority", value_enum)]
+    priority: Vec<Priority>,
+}
+
 fn main() {
     let cli = Cli::parse();
 
@@ -83,6 +102,7 @@ fn main() {
         Commands::Switch(args) => handle_switch(args),
         Commands::Add(args) => handle_add(args),
         Commands::Mv(args) => handle_mv(args),
+        Commands::List(args) => handle_list(args),
     };
 
     if let Err(err) = result {
@@ -133,5 +153,48 @@ fn handle_mv(args: MvArgs) -> anyhow::Result<()> {
         "Ticket {} status updated to {:?}",
         args.ticket_id, args.status
     );
+    Ok(())
+}
+
+fn handle_list(args: ListArgs) -> anyhow::Result<()> {
+    // Default to todo and doing if no status filter provided
+    let statuses = if args.status.is_empty() {
+        vec![Status::todo, Status::doing]
+    } else {
+        args.status
+    };
+    
+    let tickets = ffi::list(args.long, statuses, args.priority)?;
+
+    if tickets.is_empty() {
+        println!("No tickets found.");
+        return Ok(());
+    }
+
+    if args.long {
+        // Find max title length for alignment
+        let max_title_len = tickets.iter()
+            .map(|t| t.title.len())
+            .max()
+            .unwrap_or(0);
+        
+        for ticket in tickets {
+            // Detailed view with aligned columns: ID title [priority] status
+            println!(
+                "{} {:<width$} [{:?}] {:?}",
+                ticket.id, 
+                ticket.title, 
+                ticket.priority, 
+                ticket.status,
+                width = max_title_len
+            );
+        }
+    } else {
+        for ticket in tickets {
+            // Simple view: just ID and title
+            println!("{} {}", ticket.id, ticket.title);
+        }
+    }
+
     Ok(())
 }

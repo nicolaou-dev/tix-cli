@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-use crate::ffi::{TIX_INVALID_PRIORITY, TIX_INVALID_TITLE, TixError, tix_add};
+use crate::ffi::{TIX_INVALID_PRIORITY, TIX_INVALID_TITLE, TixError, priority::Priority, tix_add};
 
 #[derive(Debug, Error)]
 pub enum AddError {
@@ -11,21 +11,6 @@ pub enum AddError {
     InvalidArgument,
 }
 
-#[repr(u8)]
-#[derive(Debug, Clone, Copy, clap::ValueEnum)]
-pub enum Priority {
-    #[value(name = "a", help = "High priority")]
-    a = b'a',
-    #[value(name = "b", help = "Medium priority")]
-    b = b'b',
-    #[value(name = "c", help = "Low priority")]
-    c = b'c',
-    #[value(name = "z", help = "Default priority")]
-    z = b'z',
-
-    #[value(name = "none", help = "Use default priority")]
-    None = 0,
-}
 pub fn add(title: &str, body: Option<&str>, priority: Priority) -> Result<String, AddError> {
     // SAFETY: tix_add expects a null-terminated string for title and body
     let c_title = std::ffi::CString::new(title).map_err(|_| AddError::InvalidArgument)?;

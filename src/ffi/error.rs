@@ -32,6 +32,8 @@ pub enum TixError {
     SwitchAlreadyOnProject(String),
     #[error("Invalid priority value")]
     InvalidPriority,
+    #[error("Invalid status value")]
+    InvalidStatus,
     #[error("Invalid title")]
     InvalidTitle,
 }
