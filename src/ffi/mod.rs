@@ -28,8 +28,14 @@ pub use mv::mv;
 pub mod list;
 pub use list::list;
 
+pub mod show;
+pub use show::show;
+
 pub mod status;
 pub use status::Status;
 
 pub mod priority;
 pub use priority::Priority;
+
+pub mod ticket;
+pub use ticket::Ticket;

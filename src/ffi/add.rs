@@ -1,6 +1,8 @@
 use thiserror::Error;
 
-use crate::ffi::{TIX_INVALID_PRIORITY, TIX_INVALID_TITLE, TixError, priority::Priority, tix_add};
+use crate::ffi::{
+    TIX_INVALID_PRIORITY, TIX_INVALID_TITLE, TixError, priority::Priority, tix_add, tix_add_free,
+};
 
 #[derive(Debug, Error)]
 pub enum AddError {
@@ -41,7 +43,7 @@ pub fn add(title: &str, body: Option<&str>, priority: Priority) -> Result<String
             let value = c_str.to_string_lossy().to_string();
 
             // SAFETY: value_ptr was allocated by tix_add and must be freed
-            unsafe { libc::free(value_ptr as *mut libc::c_void) };
+            unsafe { tix_add_free(value_ptr) };
             Ok(format!("Created ticket: {value}"))
         }
 

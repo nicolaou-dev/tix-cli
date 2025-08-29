@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-use crate::ffi::{TIX_CONFIG_INVALID_KEY, TixError, tix_config_set};
+use crate::ffi::{TIX_CONFIG_INVALID_KEY, TixError, tix_config_get_free, tix_config_set};
 
 #[derive(Debug, Error)]
 pub enum ConfigError {
@@ -45,7 +45,7 @@ pub fn config_get(key: &str) -> Result<String, ConfigError> {
             let value = c_str.to_string_lossy().to_string();
 
             // SAFETY: value_ptr was allocated by tix_config_get and must be freed
-            unsafe { libc::free(value_ptr as *mut libc::c_void) };
+            unsafe { tix_config_get_free(value_ptr) };
             Ok(value)
         }
         TIX_CONFIG_INVALID_KEY => Err(ConfigError::TixError(TixError::ConfigInvalidKey)),
