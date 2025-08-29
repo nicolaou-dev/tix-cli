@@ -36,4 +36,6 @@ pub enum TixError {
     InvalidStatus,
     #[error("Invalid title")]
     InvalidTitle,
+    #[error("Ticket Not Found")]
+    TicketNotFound,
 }

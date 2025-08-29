@@ -29,7 +29,7 @@ pub mod list;
 pub use list::list;
 
 pub mod show;
-pub use show::show;
+pub use show::{show, show_title, show_body, show_status, show_priority};
 
 pub mod status;
 pub use status::Status;

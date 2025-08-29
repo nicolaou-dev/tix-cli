@@ -33,6 +33,9 @@ enum Commands {
     /// List tickets
     #[command(name = "ls")]
     List(ListArgs),
+
+    /// Show detailed information about a ticket
+    Show(ShowArgs),
 }
 
 #[derive(Args)]
@@ -88,9 +91,15 @@ struct ListArgs {
     #[arg(short = 's', long = "status", value_enum)]
     status: Vec<Status>,
 
-    /// Filter by priority (can be specified multiple times) 
+    /// Filter by priority (can be specified multiple times)
     #[arg(short = 'p', long = "priority", value_enum)]
     priority: Vec<Priority>,
+}
+
+#[derive(Args)]
+struct ShowArgs {
+    /// Ticket ID
+    ticket_id: String,
 }
 
 fn main() {
@@ -103,6 +112,7 @@ fn main() {
         Commands::Add(args) => handle_add(args),
         Commands::Mv(args) => handle_mv(args),
         Commands::List(args) => handle_list(args),
+        Commands::Show(args) => handle_show(&args.ticket_id),
     };
 
     if let Err(err) = result {
@@ -163,7 +173,7 @@ fn handle_list(args: ListArgs) -> anyhow::Result<()> {
     } else {
         args.status
     };
-    
+
     let tickets = ffi::list(args.long, statuses, args.priority)?;
 
     if tickets.is_empty() {
@@ -173,18 +183,15 @@ fn handle_list(args: ListArgs) -> anyhow::Result<()> {
 
     if args.long {
         // Find max title length for alignment
-        let max_title_len = tickets.iter()
-            .map(|t| t.title.len())
-            .max()
-            .unwrap_or(0);
-        
+        let max_title_len = tickets.iter().map(|t| t.title.len()).max().unwrap_or(0);
+
         for ticket in tickets {
             // Detailed view with aligned columns: ID title [priority] status
             println!(
                 "{} {:<width$} [{:?}] {:?}",
-                ticket.id, 
-                ticket.title, 
-                ticket.priority, 
+                ticket.id,
+                ticket.title,
+                ticket.priority,
                 ticket.status,
                 width = max_title_len
             );
@@ -198,3 +205,46 @@ fn handle_list(args: ListArgs) -> anyhow::Result<()> {
 
     Ok(())
 }
+
+fn handle_show(ticket_id: &str) -> anyhow::Result<()> {
+    // Check if the ticket_id contains a field specifier (e.g., "01K3XXX:title")
+    if let Some(colon_pos) = ticket_id.find(':') {
+        let id = &ticket_id[..colon_pos];
+        let field = &ticket_id[colon_pos + 1..];
+        
+        match field {
+            "title" => {
+                let title = ffi::show_title(id)?;
+                println!("{}", title);
+            }
+            "body" => {
+                let body = ffi::show_body(id)?;
+                println!("{}", body);
+            }
+            "status" => {
+                let status = ffi::show_status(id)?;
+                println!("{:?}", status);
+            }
+            "priority" => {
+                let priority = ffi::show_priority(id)?;
+                println!("{:?}", priority);
+            }
+            _ => {
+                eprintln!("Unknown field: {}. Valid fields are: title, body, status, priority", field);
+                std::process::exit(1);
+            }
+        }
+    } else {
+        // No field specifier, show the full ticket
+        let ticket = ffi::show(ticket_id)?;
+        println!("ID: {}", ticket.id);
+        println!("Title: {}", ticket.title);
+        println!("Status: {:?}", ticket.status);
+        println!("Priority: {:?}", ticket.priority);
+        if let Some(body) = ticket.body {
+            println!("Body:\n{body}");
+        }
+    }
+    Ok(())
+}
+
