@@ -1,4 +1,4 @@
-use crate::ffi::add::Priority;
+use crate::ffi::priority::Priority;
 use anyhow::Result;
 use std::process::Command;
 
