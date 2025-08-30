@@ -1,4 +1,4 @@
-use crate::ffi::priority::Priority;
+use crate::ffi::{priority::Priority, ticket::Ticket};
 use anyhow::Result;
 use std::process::Command;
 
@@ -26,12 +26,12 @@ pub fn open_editor_for_ticket() -> Result<(String, Option<String>, Priority)> {
 
     // Parse the content
     let (title, body, priority) = parse_ticket_template(&content)?;
-    
+
     // Abort if title is empty
     if title.is_empty() {
         anyhow::bail!("Aborting due to empty ticket message");
     }
-    
+
     Ok((title, body, priority))
 }
 
@@ -90,3 +90,52 @@ fn parse_ticket_template(content: &str) -> Result<(String, Option<String>, Prior
     Ok((title, body, priority))
 }
 
+pub fn open_editor_for_ticket_amend(
+    ticket: &Ticket,
+) -> Result<(Option<String>, Option<String>, Option<Priority>)> {
+    // Create a temporary file with current ticket data
+    let temp_file = std::env::temp_dir().join(format!("tix_amend_{}.txt", std::process::id()));
+
+    // Create template with current ticket data
+    let current_template = format!(
+        "---\nTitle: {}\nPriority: {:?}\n---\n{}",
+        ticket.title,
+        ticket.priority,
+        ticket.body.as_deref().unwrap_or("")
+    );
+
+    std::fs::write(&temp_file, current_template)?;
+
+    // Open editor
+    let editor = std::env::var("EDITOR").unwrap_or_else(|_| "vi".to_string());
+    let status = Command::new(&editor).arg(&temp_file).status()?;
+
+    if !status.success() {
+        anyhow::bail!("Editor exited with error");
+    }
+
+    // Parse the file content
+    let content = std::fs::read_to_string(&temp_file)?;
+    std::fs::remove_file(&temp_file).ok(); // Clean up temp file
+
+    // Parse the content
+    let (new_title, new_body, new_priority) = parse_ticket_template(&content)?;
+
+    // Compare with original ticket and only return changes
+    let title_opt = match new_title != ticket.title {
+        true => Some(new_title),
+        false => None,
+    };
+    let body_opt = if new_body != ticket.body {
+        new_body
+    } else {
+        None
+    };
+    let priority_opt = if new_priority != ticket.priority && new_priority != Priority::None {
+        Some(new_priority)
+    } else {
+        None
+    };
+
+    Ok((title_opt, body_opt, priority_opt))
+}

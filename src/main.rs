@@ -36,6 +36,27 @@ enum Commands {
 
     /// Show detailed information about a ticket
     Show(ShowArgs),
+
+    /// Amend a ticket (modify title, body, priority)
+    Amend(AmendArgs),
+}
+
+#[derive(Args)]
+struct AmendArgs {
+    /// Ticket ID
+    ticket_id: String,
+
+    /// New ticket title
+    #[arg(short, long)]
+    title: Option<String>,
+
+    /// New ticket body
+    #[arg(short, long)]
+    body: Option<String>,
+
+    /// New ticket priority
+    #[arg(short, long)]
+    priority: Option<Priority>,
 }
 
 #[derive(Args)]
@@ -113,6 +134,7 @@ fn main() {
         Commands::Mv(args) => handle_mv(args),
         Commands::List(args) => handle_list(args),
         Commands::Show(args) => handle_show(&args.ticket_id),
+        Commands::Amend(args) => handle_amend(args),
     };
 
     if let Err(err) = result {
@@ -211,7 +233,7 @@ fn handle_show(ticket_id: &str) -> anyhow::Result<()> {
     if let Some(colon_pos) = ticket_id.find(':') {
         let id = &ticket_id[..colon_pos];
         let field = &ticket_id[colon_pos + 1..];
-        
+
         match field {
             "title" => {
                 let title = ffi::show_title(id)?;
@@ -230,7 +252,10 @@ fn handle_show(ticket_id: &str) -> anyhow::Result<()> {
                 println!("{:?}", priority);
             }
             _ => {
-                eprintln!("Unknown field: {}. Valid fields are: title, body, status, priority", field);
+                eprintln!(
+                    "Unknown field: {}. Valid fields are: title, body, status, priority",
+                    field
+                );
                 std::process::exit(1);
             }
         }
@@ -248,3 +273,21 @@ fn handle_show(ticket_id: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
+fn handle_amend(args: AmendArgs) -> anyhow::Result<()> {
+    // Check if any flags are provided
+    let has_flags = args.title.is_some() || args.body.is_some() || args.priority.is_some();
+
+    if has_flags {
+        // Use provided flags directly - if user provided it, pass it
+        ffi::amend(&args.ticket_id, args.title.as_deref(), args.body.as_deref(), args.priority)?;
+    } else {
+        // No flags provided - open editor (returns only changed fields)
+        let current_ticket = ffi::show(&args.ticket_id)?;
+        let (title_opt, body_opt, priority_opt) = editor::open_editor_for_ticket_amend(&current_ticket)?;
+        
+        ffi::amend(&args.ticket_id, title_opt.as_deref(), body_opt.as_deref(), priority_opt)?;
+    }
+
+    println!("Ticket {} amended successfully", args.ticket_id);
+    Ok(())
+}
