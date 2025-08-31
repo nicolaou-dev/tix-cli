@@ -40,6 +40,9 @@ enum Commands {
 
     /// Amend a ticket (modify title, body, priority)
     Amend(AmendArgs),
+
+    /// Undo the last change
+    Undo,
 }
 
 #[derive(Args)]
@@ -137,6 +140,7 @@ fn main() {
         Commands::List(args) => handle_list(args),
         Commands::Show(args) => handle_show(&args.ticket_id),
         Commands::Amend(args) => handle_amend(args),
+        Commands::Undo => handle_undo(),
     };
     let duration = start.elapsed();
 
@@ -297,5 +301,11 @@ fn handle_amend(args: AmendArgs) -> anyhow::Result<()> {
     }
 
     println!("Ticket {} amended successfully", args.ticket_id);
+    Ok(())
+}
+
+fn handle_undo() -> anyhow::Result<()> {
+    let result = ffi::undo()?;
+    println!("{result}");
     Ok(())
 }

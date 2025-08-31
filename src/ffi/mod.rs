@@ -34,6 +34,9 @@ pub use show::{show, show_body, show_priority, show_status, show_title};
 pub mod amend;
 pub use amend::amend;
 
+pub mod undo;
+pub use undo::undo;
+
 pub mod status;
 pub use status::Status;
 
