@@ -43,9 +43,12 @@ enum Commands {
 
     /// Undo the last change
     Undo,
+
     /// Redo the last undone change
     Redo,
 
+    /// Show commit history
+    Log(LogArgs),
 }
 
 #[derive(Args)]
@@ -130,6 +133,21 @@ struct ShowArgs {
     ticket_id: String,
 }
 
+#[derive(Args)]
+struct LogArgs {
+    /// Show one line per commit
+    #[arg(long)]
+    oneline: bool,
+
+    /// Limit number of commits
+    #[arg(short, long)]
+    limit: Option<i32>,
+
+    /// Show commits since date (e.g., "2 days ago")
+    #[arg(short, long)]
+    since: Option<String>,
+}
+
 fn main() {
     let cli = Cli::parse();
 
@@ -145,6 +163,7 @@ fn main() {
         Commands::Amend(args) => handle_amend(args),
         Commands::Undo => handle_undo(),
         Commands::Redo => handle_redo(),
+        Commands::Log(args) => handle_log(args),
     };
     let duration = start.elapsed();
 
@@ -313,9 +332,29 @@ fn handle_undo() -> anyhow::Result<()> {
     println!("{result}");
     Ok(())
 }
+
 fn handle_redo() -> anyhow::Result<()> {
     let result = ffi::redo()?;
     println!("{result}");
     Ok(())
 }
 
+fn handle_log(args: LogArgs) -> anyhow::Result<()> {
+    let result = ffi::log(args.oneline, args.limit, args.since.as_deref())?;
+    
+    if let Ok(mut pager) = std::process::Command::new("less")
+        .args(["-R", "-F", "-X"])
+        .stdin(std::process::Stdio::piped())
+        .spawn()
+    {
+        if let Some(stdin) = pager.stdin.as_mut() {
+            use std::io::Write;
+            let _ = stdin.write_all(result.as_bytes());
+        }
+        let _ = pager.wait();
+    } else {
+        print!("{result}");
+    }
+    
+    Ok(())
+}

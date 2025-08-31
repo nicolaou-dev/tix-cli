@@ -39,6 +39,10 @@ pub use undo::undo;
 
 pub mod redo;
 pub use redo::redo;
+
+pub mod log;
+pub use log::log;
+
 pub mod status;
 pub use status::Status;
 
