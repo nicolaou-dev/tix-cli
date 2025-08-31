@@ -20,7 +20,7 @@ fn main() {
         _ => panic!("Unsupported platform: {target_os}-{target_arch}"),
     };
 
-    let version = "v0.0.5";
+    let version = "v0.0.7";
     let download_url =
         format!("https://github.com/nicolaou-dev/tix/releases/download/{version}/{download_name}");
 

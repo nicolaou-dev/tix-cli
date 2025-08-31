@@ -1,4 +1,5 @@
 use clap::{Args, Parser, Subcommand};
+use std::time::Instant;
 
 use crate::ffi::{Status, priority::Priority};
 
@@ -126,6 +127,7 @@ struct ShowArgs {
 fn main() {
     let cli = Cli::parse();
 
+    let start = Instant::now();
     let result = match cli.command {
         Commands::Init => handle_init(),
         Commands::Config(args) => handle_config(args),
@@ -136,10 +138,16 @@ fn main() {
         Commands::Show(args) => handle_show(&args.ticket_id),
         Commands::Amend(args) => handle_amend(args),
     };
+    let duration = start.elapsed();
 
-    if let Err(err) = result {
-        eprintln!("Error: {err}");
-        std::process::exit(1);
+    match result {
+        Ok(_) => {
+            eprintln!("Command completed in {:.2?}", duration);
+        }
+        Err(err) => {
+            eprintln!("Command failed in {:.2?}: {err}", duration);
+            std::process::exit(1);
+        }
     }
 }
 
