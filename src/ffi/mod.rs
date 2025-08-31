@@ -37,6 +37,8 @@ pub use amend::amend;
 pub mod undo;
 pub use undo::undo;
 
+pub mod redo;
+pub use redo::redo;
 pub mod status;
 pub use status::Status;
 

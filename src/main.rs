@@ -43,6 +43,9 @@ enum Commands {
 
     /// Undo the last change
     Undo,
+    /// Redo the last undone change
+    Redo,
+
 }
 
 #[derive(Args)]
@@ -141,6 +144,7 @@ fn main() {
         Commands::Show(args) => handle_show(&args.ticket_id),
         Commands::Amend(args) => handle_amend(args),
         Commands::Undo => handle_undo(),
+        Commands::Redo => handle_redo(),
     };
     let duration = start.elapsed();
 
@@ -309,3 +313,9 @@ fn handle_undo() -> anyhow::Result<()> {
     println!("{result}");
     Ok(())
 }
+fn handle_redo() -> anyhow::Result<()> {
+    let result = ffi::redo()?;
+    println!("{result}");
+    Ok(())
+}
+
