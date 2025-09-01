@@ -54,6 +54,10 @@ pub use push::push;
 
 pub mod pull;
 pub use pull::pull;
+
+pub mod clone;
+pub use clone::clone;
+
 pub mod status;
 pub use status::Status;
 

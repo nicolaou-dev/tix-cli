@@ -61,6 +61,9 @@ enum Commands {
 
     /// Pull changes from remote repository
     Pull,
+
+    /// Clone a remote repository
+    Clone(CloneArgs),
 }
 
 #[derive(Args)]
@@ -182,6 +185,12 @@ struct RemoteAddArgs {
     url: String,
 }
 
+#[derive(Args)]
+struct CloneArgs {
+    /// Repository URL to clone
+    url: String,
+}
+
 
 fn main() {
     let cli = Cli::parse();
@@ -203,6 +212,7 @@ fn main() {
         Commands::Remote(args) => handle_remote(args),
         Commands::Push => handle_push(),
         Commands::Pull => handle_pull(),
+        Commands::Clone(args) => handle_clone(args),
     };
     let duration = start.elapsed();
 
@@ -382,7 +392,7 @@ fn handle_log(args: LogArgs) -> anyhow::Result<()> {
     let result = ffi::log(args.oneline, args.limit, args.since.as_deref())?;
     
     if let Ok(mut pager) = std::process::Command::new("less")
-        .args(["-R", "-F", "-X"])
+        .args(["-R", "-F"])
         .stdin(std::process::Stdio::piped())
         .spawn()
     {
@@ -446,6 +456,12 @@ fn handle_push() -> anyhow::Result<()> {
 
 fn handle_pull() -> anyhow::Result<()> {
     let result = ffi::pull()?;
+    println!("{result}");
+    Ok(())
+}
+
+fn handle_clone(args: CloneArgs) -> anyhow::Result<()> {
+    let result = ffi::clone(&args.url)?;
     println!("{result}");
     Ok(())
 }
