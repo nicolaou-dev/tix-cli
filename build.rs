@@ -16,11 +16,12 @@ fn main() {
         ("macos", "aarch64") => ("libtix.a", "libtix-macos-aarch64.tar.gz"),
         ("macos", "x86_64") => ("libtix.a", "libtix-macos-x86_64.tar.gz"),
         ("linux", "x86_64") => ("libtix.a", "libtix-linux-x86_64.tar.gz"),
+        ("linux", "aarch64") => ("libtix.a", "libtix-linux-aarch64.tar.gz"),
         ("windows", "x86_64") => ("tix.lib", "libtix-windows-x86_64.zip"),
         _ => panic!("Unsupported platform: {target_os}-{target_arch}"),
     };
 
-    let version = "v0.0.9";
+    let version = "v0.0.17";
     let download_url =
         format!("https://github.com/nicolaou-dev/tix/releases/download/{version}/{download_name}");
 
