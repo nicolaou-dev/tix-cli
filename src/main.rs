@@ -58,6 +58,9 @@ enum Commands {
 
     /// Push changes to remote repository
     Push,
+
+    /// Pull changes from remote repository
+    Pull,
 }
 
 #[derive(Args)]
@@ -199,6 +202,7 @@ fn main() {
         Commands::Projects => handle_projects(),
         Commands::Remote(args) => handle_remote(args),
         Commands::Push => handle_push(),
+        Commands::Pull => handle_pull(),
     };
     let duration = start.elapsed();
 
@@ -436,6 +440,12 @@ fn handle_remote(args: RemoteArgs) -> anyhow::Result<()> {
 
 fn handle_push() -> anyhow::Result<()> {
     let result = ffi::push()?;
+    println!("{result}");
+    Ok(())
+}
+
+fn handle_pull() -> anyhow::Result<()> {
+    let result = ffi::pull()?;
     println!("{result}");
     Ok(())
 }
