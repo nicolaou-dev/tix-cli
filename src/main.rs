@@ -53,7 +53,7 @@ enum Commands {
     /// List all local projects
     Projects,
 
-    /// List remote repositories
+    /// Remote repository operations
     Remote(RemoteArgs),
 }
 
@@ -156,9 +156,24 @@ struct LogArgs {
 
 #[derive(Args)]
 struct RemoteArgs {
-    /// Show remote URLs
+    #[command(subcommand)]
+    command: Option<RemoteCommands>,
+
+    /// Show remote URLs (when listing)
     #[arg(short, long)]
     verbose: bool,
+}
+
+#[derive(Subcommand)]
+enum RemoteCommands {
+    /// Add a remote repository
+    Add(RemoteAddArgs),
+}
+
+#[derive(Args)]
+struct RemoteAddArgs {
+    /// Remote repository URL
+    url: String,
 }
 
 fn main() {
@@ -394,12 +409,21 @@ fn handle_projects() -> anyhow::Result<()> {
 }
 
 fn handle_remote(args: RemoteArgs) -> anyhow::Result<()> {
-    let result = ffi::remote(args.verbose)?;
-    
-    if result.is_empty() {
-        println!("No remotes configured.");
-    } else {
-        print!("{result}");
+    match args.command {
+        Some(RemoteCommands::Add(add_args)) => {
+            let result = ffi::remote_add(&add_args.url)?;
+            println!("{result}");
+        }
+        None => {
+            // List remotes
+            let result = ffi::remote(args.verbose)?;
+            
+            if result.is_empty() {
+                println!("No remotes configured.");
+            } else {
+                print!("{result}");
+            }
+        }
     }
     
     Ok(())

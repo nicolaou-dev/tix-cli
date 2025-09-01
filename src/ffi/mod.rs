@@ -47,7 +47,7 @@ pub mod projects;
 pub use projects::projects;
 
 pub mod remote;
-pub use remote::remote;
+pub use remote::{remote, remote_add};
 
 pub mod status;
 pub use status::Status;
