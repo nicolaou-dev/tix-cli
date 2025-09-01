@@ -55,6 +55,9 @@ enum Commands {
 
     /// Remote repository operations
     Remote(RemoteArgs),
+
+    /// Push changes to remote repository
+    Push,
 }
 
 #[derive(Args)]
@@ -176,6 +179,7 @@ struct RemoteAddArgs {
     url: String,
 }
 
+
 fn main() {
     let cli = Cli::parse();
 
@@ -194,6 +198,7 @@ fn main() {
         Commands::Log(args) => handle_log(args),
         Commands::Projects => handle_projects(),
         Commands::Remote(args) => handle_remote(args),
+        Commands::Push => handle_push(),
     };
     let duration = start.elapsed();
 
@@ -426,5 +431,11 @@ fn handle_remote(args: RemoteArgs) -> anyhow::Result<()> {
         }
     }
     
+    Ok(())
+}
+
+fn handle_push() -> anyhow::Result<()> {
+    let result = ffi::push()?;
+    println!("{result}");
     Ok(())
 }
