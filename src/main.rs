@@ -57,7 +57,7 @@ enum Commands {
     Remote(RemoteArgs),
 
     /// Push changes to remote repository
-    Push,
+    Push(PushArgs),
 
     /// Pull changes from remote repository
     Pull,
@@ -116,6 +116,10 @@ struct AddArgs {
     /// Ticket priority
     #[arg(short, long, default_value = "none")]
     priority: Priority,
+
+    /// Ticket status
+    #[arg(short, long)]
+    status: Option<Status>,
 }
 
 #[derive(Args)]
@@ -191,6 +195,17 @@ struct CloneArgs {
     url: String,
 }
 
+#[derive(Args)]
+struct PushArgs {
+    /// Force push (--force)
+    #[arg(long)]
+    force: bool,
+
+    /// Force push with lease (--force-with-lease)
+    #[arg(long)]
+    force_with_lease: bool,
+}
+
 
 fn main() {
     let cli = Cli::parse();
@@ -210,7 +225,7 @@ fn main() {
         Commands::Log(args) => handle_log(args),
         Commands::Projects => handle_projects(),
         Commands::Remote(args) => handle_remote(args),
-        Commands::Push => handle_push(),
+        Commands::Push(args) => handle_push(args),
         Commands::Pull => handle_pull(),
         Commands::Clone(args) => handle_clone(args),
     };
@@ -250,15 +265,15 @@ fn handle_switch(args: SwitchArgs) -> anyhow::Result<()> {
 }
 
 fn handle_add(args: AddArgs) -> anyhow::Result<()> {
-    let (title, body, priority) = if let Some(title) = args.title {
+    let (title, body, priority, status) = if let Some(title) = args.title {
         // Use provided arguments
-        (title, args.body, args.priority)
+        (title, args.body, args.priority, args.status)
     } else {
         // Open editor for interactive input
         editor::open_editor_for_ticket()?
     };
 
-    let result = ffi::add(&title, body.as_deref(), priority)?;
+    let result = ffi::add(&title, body.as_deref(), priority, status)?;
     println!("{result}");
     Ok(())
 }
@@ -448,8 +463,8 @@ fn handle_remote(args: RemoteArgs) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn handle_push() -> anyhow::Result<()> {
-    let result = ffi::push()?;
+fn handle_push(args: PushArgs) -> anyhow::Result<()> {
+    let result = ffi::push(args.force, args.force_with_lease)?;
     println!("{result}");
     Ok(())
 }

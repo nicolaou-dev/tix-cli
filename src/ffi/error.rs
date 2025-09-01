@@ -38,4 +38,8 @@ pub enum TixError {
     InvalidTitle,
     #[error("Ticket Not Found")]
     TicketNotFound,
+    #[error("Cannot initialize repository: not on main project")]
+    InitNotOnMain,
+    #[error("Push rejected, use --force or --force-with-lease")]
+    PushRejectedNeedsForce,
 }

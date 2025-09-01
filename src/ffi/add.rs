@@ -1,7 +1,7 @@
 use thiserror::Error;
 
 use crate::ffi::{
-    TIX_INVALID_PRIORITY, TIX_INVALID_TITLE, TixError, priority::Priority, tix_add, tix_add_free,
+    TIX_INVALID_PRIORITY, TIX_INVALID_TITLE, TIX_INVALID_STATUS, TixError, priority::Priority, status::Status, tix_add, tix_add_free,
 };
 
 #[derive(Debug, Error)]
@@ -13,7 +13,7 @@ pub enum AddError {
     InvalidArgument,
 }
 
-pub fn add(title: &str, body: Option<&str>, priority: Priority) -> Result<String, AddError> {
+pub fn add(title: &str, body: Option<&str>, priority: Priority, status: Option<Status>) -> Result<String, AddError> {
     // SAFETY: tix_add expects a null-terminated string for title and body
     let c_title = std::ffi::CString::new(title).map_err(|_| AddError::InvalidArgument)?;
 
@@ -24,11 +24,17 @@ pub fn add(title: &str, body: Option<&str>, priority: Priority) -> Result<String
 
     let mut value_ptr = std::ptr::null_mut();
 
+    let status_byte = match status {
+        Some(s) => s as u8,
+        None => 0, // Let tix lib handle default
+    };
+
     let result = unsafe {
         tix_add(
             c_title.as_ptr(),
             c_body.as_ptr(),
             priority as u8,
+            status_byte,
             &mut value_ptr,
         )
     };
@@ -49,6 +55,7 @@ pub fn add(title: &str, body: Option<&str>, priority: Priority) -> Result<String
 
         TIX_INVALID_PRIORITY => Err(AddError::TixError(TixError::InvalidPriority)),
         TIX_INVALID_TITLE => Err(AddError::TixError(TixError::InvalidTitle)),
+        TIX_INVALID_STATUS => Err(AddError::TixError(TixError::InvalidStatus)),
 
         _ => Err(AddError::TixError(TixError::UnknownError)),
     }

@@ -1,11 +1,11 @@
-use crate::ffi::{priority::Priority, ticket::Ticket};
+use crate::ffi::{priority::Priority, status::Status, ticket::Ticket};
 use anyhow::Result;
 use std::process::Command;
 
 // Embed template at compile time
 const TICKET_TEMPLATE: &str = include_str!("../templates/ticket.txt");
 
-pub fn open_editor_for_ticket() -> Result<(String, Option<String>, Priority)> {
+pub fn open_editor_for_ticket() -> Result<(String, Option<String>, Priority, Option<Status>)> {
     // Create a temporary file with template
     let temp_file = std::env::temp_dir().join(format!("tix_ticket_{}.txt", std::process::id()));
 
@@ -25,20 +25,21 @@ pub fn open_editor_for_ticket() -> Result<(String, Option<String>, Priority)> {
     std::fs::remove_file(&temp_file).ok(); // Clean up temp file
 
     // Parse the content
-    let (title, body, priority) = parse_ticket_template(&content)?;
+    let (title, body, priority, status) = parse_ticket_template(&content)?;
 
     // Abort if title is empty
     if title.is_empty() {
         anyhow::bail!("Aborting due to empty ticket message");
     }
 
-    Ok((title, body, priority))
+    Ok((title, body, priority, status))
 }
 
-fn parse_ticket_template(content: &str) -> Result<(String, Option<String>, Priority)> {
+fn parse_ticket_template(content: &str) -> Result<(String, Option<String>, Priority, Option<Status>)> {
     let lines = content.lines();
     let mut title = String::new();
     let mut priority = Priority::z;
+    let mut status = None;
     let mut in_header = false;
     let mut in_body = false;
     let mut body = Vec::new();
@@ -74,6 +75,19 @@ fn parse_ticket_template(content: &str) -> Result<(String, Option<String>, Prior
                     "z" => Priority::z,
                     _ => Priority::None,
                 };
+            } else if line.starts_with("Status:") {
+                let s = line
+                    .strip_prefix("Status:")
+                    .unwrap_or("")
+                    .trim()
+                    .to_lowercase();
+                status = match s.as_str() {
+                    "backlog" => Some(Status::backlog),
+                    "todo" => Some(Status::todo),
+                    "doing" => Some(Status::doing),
+                    "done" => Some(Status::done),
+                    _ => None,
+                };
             }
         }
     }
@@ -87,7 +101,7 @@ fn parse_ticket_template(content: &str) -> Result<(String, Option<String>, Prior
         Some(body_text)
     };
 
-    Ok((title, body, priority))
+    Ok((title, body, priority, status))
 }
 
 pub fn open_editor_for_ticket_amend(
@@ -119,7 +133,7 @@ pub fn open_editor_for_ticket_amend(
     std::fs::remove_file(&temp_file).ok(); // Clean up temp file
 
     // Parse the content
-    let (new_title, new_body, new_priority) = parse_ticket_template(&content)?;
+    let (new_title, new_body, new_priority, _new_status) = parse_ticket_template(&content)?;
 
     // Compare with original ticket and only return changes
     let title_opt = match new_title != ticket.title {

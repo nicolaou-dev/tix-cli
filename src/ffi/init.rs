@@ -1,4 +1,4 @@
-use crate::ffi::{TIX_INIT_ACCESS_DENIED, TIX_INIT_WORKSPACE_CREATION_FAILED, TixError, tix_init};
+use crate::ffi::{TIX_INIT_ACCESS_DENIED, TIX_INIT_WORKSPACE_CREATION_FAILED, TIX_INIT_NOT_ON_MAIN_BRANCH, TixError, tix_init};
 use strum::Display;
 
 /// Result of initializing a tix workspace
@@ -20,6 +20,7 @@ pub fn init() -> Result<InitResult, TixError> {
         1 => Ok(InitResult::Reinitialized),
         TIX_INIT_WORKSPACE_CREATION_FAILED => Err(TixError::InitWorkspaceCreationFailed),
         TIX_INIT_ACCESS_DENIED => Err(TixError::InitAccessDenied),
+        TIX_INIT_NOT_ON_MAIN_BRANCH => Err(TixError::InitNotOnMain),
         _ => Err(TixError::UnknownError),
     }
 }
