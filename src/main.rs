@@ -464,13 +464,17 @@ fn handle_remote(args: RemoteArgs) -> anyhow::Result<()> {
 }
 
 fn handle_push(args: PushArgs) -> anyhow::Result<()> {
+    eprint!("Pushing...");
     let result = ffi::push(args.force, args.force_with_lease)?;
+    eprintln!();
     println!("{result}");
     Ok(())
 }
 
 fn handle_pull() -> anyhow::Result<()> {
+    eprint!("Pulling...");
     let result = ffi::pull()?;
+    eprintln!();
     println!("{result}");
     Ok(())
 }
