@@ -43,6 +43,9 @@ pub use redo::redo;
 pub mod log;
 pub use log::log;
 
+pub mod projects;
+pub use projects::projects;
+
 pub mod status;
 pub use status::Status;
 

@@ -49,6 +49,9 @@ enum Commands {
 
     /// Show commit history
     Log(LogArgs),
+
+    /// List all local projects
+    Projects,
 }
 
 #[derive(Args)]
@@ -164,6 +167,7 @@ fn main() {
         Commands::Undo => handle_undo(),
         Commands::Redo => handle_redo(),
         Commands::Log(args) => handle_log(args),
+        Commands::Projects => handle_projects(),
     };
     let duration = start.elapsed();
 
@@ -354,6 +358,25 @@ fn handle_log(args: LogArgs) -> anyhow::Result<()> {
         let _ = pager.wait();
     } else {
         print!("{result}");
+    }
+    
+    Ok(())
+}
+
+fn handle_projects() -> anyhow::Result<()> {
+    let projects = ffi::projects()?;
+    
+    if projects.is_empty() {
+        println!("No projects found.");
+        return Ok(());
+    }
+
+    for (i, project) in projects.iter().enumerate() {
+        if i == 0 {
+            println!("* {}", project);
+        } else {
+            println!("  {}", project);
+        }
     }
     
     Ok(())
