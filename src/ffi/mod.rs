@@ -46,6 +46,9 @@ pub use log::log;
 pub mod projects;
 pub use projects::projects;
 
+pub mod remote;
+pub use remote::remote;
+
 pub mod status;
 pub use status::Status;
 
