@@ -21,7 +21,7 @@ fn main() {
         _ => panic!("Unsupported platform: {target_os}-{target_arch}"),
     };
 
-    let version = "v0.12.0";
+    let version = "v0.13.0";
     let download_url =
         format!("https://github.com/nicolaou-dev/tix/releases/download/{version}/{download_name}");
 
@@ -44,6 +44,12 @@ fn main() {
     // Tell cargo where to find the library
     println!("cargo:rustc-link-search=native={}", out_dir.display());
     println!("cargo:rustc-link-lib=static=tix");
+    
+    // Windows-specific: Link system libraries to provide missing runtime symbols
+    if target_os == "windows" {
+        println!("cargo:rustc-link-lib=dylib=kernel32");
+        println!("cargo:rustc-link-lib=dylib=msvcrt");
+    }
 
     // Generate bindings from tix.h using bindgen
     let header_path = out_dir.join("tix.h");
