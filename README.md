@@ -27,6 +27,9 @@ Tix leverages git's powerful version control as its foundation, with each projec
 - **Atomic operations** - Every change is immediately committed
 - **Extensible** - Add custom attributes as files
 
+https://github.com/user-attachments/assets/fbba0ce7-bafc-44b2-8fa8-6b45689713f8
+
+
 **Structure:**
 
 ```
