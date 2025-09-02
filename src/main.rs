@@ -22,7 +22,7 @@ enum Commands {
     /// Get or set configuration values
     Config(ConfigArgs),
 
-    /// Switch to a different ticket
+    /// Switch to a different project
     Switch(SwitchArgs),
 
     /// Add a new ticket
@@ -47,7 +47,7 @@ enum Commands {
     /// Redo the last undone change
     Redo,
 
-    /// Show commit history
+    /// Show change history  
     Log(LogArgs),
 
     /// List all local projects
@@ -154,15 +154,15 @@ struct ShowArgs {
 
 #[derive(Args)]
 struct LogArgs {
-    /// Show one line per commit
-    #[arg(long)]
+    /// Show one line per entry
+    #[arg(short = '1', long)]
     oneline: bool,
 
-    /// Limit number of commits
+    /// Limit number of entries
     #[arg(short, long)]
     limit: Option<i32>,
 
-    /// Show commits since date (e.g., "2 days ago")
+    /// Show changes since date (e.g., "2 days ago")
     #[arg(short, long)]
     since: Option<String>,
 }
@@ -198,7 +198,7 @@ struct CloneArgs {
 #[derive(Args)]
 struct PushArgs {
     /// Force push (--force)
-    #[arg(long)]
+    #[arg(short = 'f', long)]
     force: bool,
 
     /// Force push with lease (--force-with-lease)
