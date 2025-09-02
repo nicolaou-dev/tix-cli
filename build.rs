@@ -47,8 +47,7 @@ fn main() {
     
     // Windows-specific: Link system libraries to provide missing runtime symbols
     if target_os == "windows" {
-        println!("cargo:rustc-link-lib=dylib=kernel32");
-        println!("cargo:rustc-link-lib=dylib=msvcrt");
+        println!("cargo:rustc-link-lib=static=libcmt");
     }
 
     // Generate bindings from tix.h using bindgen
