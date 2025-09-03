@@ -12,7 +12,7 @@ A git-native project management tool that treats tickets as filesystem entities 
 
 ## What is Tix?
 
-Tix leverages git's powerful version control as its foundation, with each project as a git branch. Tickets are stored as directories on your filesystem with [ULID](https://github.com/nicolaou-dev/ulid.zig) identifiers, providing:
+Tix leverages git's powerful version control as its foundation, with each project as a git branch. Tickets are stored as directories on your filesystem with [ULID](https://github.com/nicolaou-dev/ulid.zig) identifiers.
 
 **Benefits:**
 
